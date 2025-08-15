@@ -24,7 +24,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api")
 @Slf4j
-@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = {"http://localhost:5173", "https://1kmchat.xin"})
 public class UserController {
     @Autowired
     private UserService userService;
