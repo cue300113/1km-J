@@ -1,11 +1,32 @@
-server:
-  port: 8081
-
 spring:
+  redis:
+    host: localhost
+    port: 6379
+    password: 123456
+    database: 0
+    timeout: 2000ms
+    lettuce:
+      pool:
+        max-active: 8
+        max-wait: -1ms
+        max-idle: 8
+        min-idle: 0
+
+  # 文件上传配置 - 关键配置！
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 100MB  # 建议设置比单文件大一些
+      file-size-threshold: 2KB
+      enabled: true
+      resolve-lazily: false
+
   profiles:
     active: dev
+
   main:
     allow-circular-references: true
+
   datasource:
     druid:
       driver-class-name: ${sky.datasource.driver-class-name}
@@ -13,12 +34,29 @@ spring:
       username: ${sky.datasource.username}
       password: ${sky.datasource.password}
 
+
+# 服务器配置 - 重要！
+server:
+  port: 8081
+  # Tomcat配置 - 这是关键配置！
+  tomcat:
+    max-http-form-post-size: 100MB  # 设置HTTP POST请求的最大大小
+    connection-timeout: 60s  # 连接超时时间
+    max-connections: 8192
+    threads:
+      max: 200
+      min-spare: 10
+    # 其他Tomcat配置
+    max-swallow-size: 100MB  # 设置最大吞吐量
+  # 服务器超时配置
+  servlet:
+    session:
+      timeout: 30m  # 会话超时时间
+
 mybatis:
-  #mapper配置文件
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.sky.enti
   configuration:
-    #开启驼峰命名
     map-underscore-to-camel-case: true
 
 logging:
@@ -28,25 +66,25 @@ logging:
         mapper: debug
         service: info
         controller: info
+    # 添加文件上传相关的日志
+    org.springframework.web.multipart: DEBUG
+    org.apache.tomcat.util.http.fileupload: DEBUG
 
+# 自定义配置
 sky:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    host: localhost
+    port: 3306
+    database: 1kmdb
+    username: root
+    password: cue3okgood
+
   jwt:
-    # 设置jwt签名加密时使用的秘钥
     admin-secret-key: itcast
-    # 设置jwt过期时间
     admin-ttl: 7200000
-    # 设置前端传递过来的令牌名称
     admin-token-name: token
     user-secret-key: itcast
     user-ttl: 7200000
     user-token-name: authentication
-  alioss:
-    endpoint: ${sky.alioss.endpoint}
-    access-key-id: ${sky.alioss.access-key-id}
-    access-key-secret: ${sky.alioss.access-key-secret}
-    bucket-name: ${sky.alioss.bucket-name}
-  wechat:
-    app-id: ${sky.wechat.app-id}
-    app-secret: ${sky.wechat.app-secret}
-
 

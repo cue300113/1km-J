@@ -4,6 +4,6 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.sky.mapper.UserMapper">
     <insert id="insert">
-        insert into user(username,password,create_time) values (#{username}, #{password}, now())
+        insert into user(username,password,create_time,email) values (#{username}, #{password}, now(),#{email})
     </insert>
 </mapper>

@@ -5,12 +5,17 @@ import com.alibaba.fastjson2.JSON;
 import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.MessageDto;
 import com.sky.properties.JwtProperties;
+import com.sky.service.UserService;
 import com.sky.utils.JwtUtil;
 import com.sky.vo.Mesaage11;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.server.standard.SpringConfigurator;
 
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;
@@ -23,18 +28,29 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(value = "/chat")
 @Component
 @Slf4j
-public class ChatEndpint {
+public class ChatEndpint implements ApplicationContextAware {
     // 房间ID -> 该房间所有连接
     private static final Map<Long, Set<Session>> roomSessions = new ConcurrentHashMap<>();
 
     // 注入JWT配置（静态注入）
     private static JwtProperties jwtProperties;
+    private static ApplicationContext applicationContext;
 
-    @Autowired
+   /* @Autowired
     public void setJwtProperties(JwtProperties jwtProperties) {
         ChatEndpint.jwtProperties = jwtProperties;
     }
+    @Autowired
+    private UserService userService;*/
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        ChatEndpint.applicationContext = applicationContext;
+        ChatEndpint.jwtProperties = applicationContext.getBean(JwtProperties.class);
+    }
+    private static UserService getUserService() {
+        return applicationContext.getBean(UserService.class);
+    }
     @OnOpen
     public void onOpen(Session session) {
         try {
@@ -72,6 +88,10 @@ public class ChatEndpint {
             MessageDto messageDto = JSON.parseObject(message, MessageDto.class);
             Long roomId = messageDto.getRoomId();
             String content = messageDto.getContent();
+            String type = messageDto.getType();
+            String fileName = messageDto.getFileName();
+            String fileUrl = messageDto.getFileUrl();
+            Long fileSize = messageDto.getFileSize();
 
             // 从session属性获取userId
             Long userId = getUserIdFromSession(session);
@@ -81,6 +101,10 @@ public class ChatEndpint {
                     .roomId(roomId)
                     .userId(userId)
                     .createTime(java.time.LocalDateTime.now())
+                    .fileName(fileName)
+                    .fileUrl(fileUrl)
+                    .fileSize(fileSize)
+                    .type(type)
                     .build();
 
             String resp = JSON.toJSONString(mesaage11);
@@ -119,7 +143,15 @@ public class ChatEndpint {
                 roomSessions.remove(roomId);
             }
         }
-
+        // 使用静态方法获取UserService
+        if (userId != null) {
+            UserService userService = getUserService();
+            if (userService != null) {
+                userService.removeUser(userId);
+            } else {
+                log.warn("无法获取UserService，跳过移除用户操作");
+            }
+        }
         System.out.println("用户 " + userId + " 离开房间 " + roomId);
     }
 
@@ -142,4 +174,6 @@ public class ChatEndpint {
     private Long getUserIdFromSession(Session session) {
         return (Long) session.getUserProperties().get("userId");
     }
+
+
 }

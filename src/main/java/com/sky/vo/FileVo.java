@@ -1,5 +1,4 @@
-package com.sky.dto;
-
+package com.sky.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,9 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRLDto {
-    private String username;
-    private String password;
-    private String email;
-    private String verificationCode;
+public class FileVo {
+    private String url;
+    private String fileName;
+    private Long fileSize;
+    private String fileType;
 }

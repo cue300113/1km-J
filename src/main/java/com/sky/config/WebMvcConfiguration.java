@@ -28,12 +28,12 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      *
      * @param registry
      */
+    @Override
     protected void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
         registry.addInterceptor(jwtTokenUserInterceptor)
-                .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/register")
-        .excludePathPatterns("/api/login");
+                .addPathPatterns("/api/**", "/chat/**")
+                .excludePathPatterns("/api/register", "/api/login", "/api/send-verification-code", "/api/check-username", "/api/reset-password");
     }
 
     /**

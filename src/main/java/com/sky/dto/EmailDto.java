@@ -1,6 +1,5 @@
 package com.sky.dto;
 
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,9 +9,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserRLDto {
-    private String username;
-    private String password;
+public class EmailDto {
     private String email;
-    private String verificationCode;
 }
